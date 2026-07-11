@@ -1,0 +1,73 @@
+name: pte_live_db
+
+services:
+  db-mysql:
+    image: ${MYSQL_IMAGE:-mysql:8.4}
+    container_name: pte_live_db_mysql
+    hostname: db-mysql
+    restart: unless-stopped
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+08:00
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-pte_live_root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-pte_live_im}
+      MYSQL_USER: ${MYSQL_USER:-pte_live}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-pte_live_password}
+      TZ: Asia/Shanghai
+    ports:
+      - "${MYSQL_PORT:-13306}:3306"
+    volumes:
+      - pte_live_db_mysql_data:/var/lib/mysql
+      - ../pte-live-sql:/docker-entrypoint-initdb.d:ro
+    networks:
+      pte_live_net:
+        ipv4_address: ${PTE_LIVE_DB_MYSQL_IP:-172.30.0.10}
+        aliases:
+          - db-mysql
+          - pte_live_db_mysql
+          - pte_live_mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  cache-redis:
+    image: ${REDIS_IMAGE:-redis:7.2-alpine}
+    container_name: pte_live_cache_redis
+    hostname: cache-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - "${REDIS_PORT:-16379}:6379"
+    volumes:
+      - pte_live_cache_redis_data:/data
+    networks:
+      pte_live_net:
+        ipv4_address: ${PTE_LIVE_CACHE_REDIS_IP:-172.30.0.11}
+        aliases:
+          - cache-redis
+          - pte_live_cache_redis
+          - pte_live_redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+networks:
+  pte_live_net:
+    external: true
+    name: ${PTE_LIVE_NETWORK:-pte_live_net}
+
+volumes:
+  pte_live_db_mysql_data:
+    name: pte_live_db_mysql_data
+  pte_live_cache_redis_data:
+    name: pte_live_cache_redis_data

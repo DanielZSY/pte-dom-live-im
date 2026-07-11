@@ -1,0 +1,56 @@
+# 本地开发（宿主机 go run；MQ 可用 make mq-up 启动）
+# cp conf/app.yaml.example conf/app.yaml 后按需修改
+# Docker：conf/app.yaml 挂载到 pte_live_im 容器
+
+cluster:
+  enabled: false
+
+common:
+  httpPort: "11511"
+  webSocketPort: "11510"
+  rpcPort: "11512"
+  cluster: false
+  cryptoKey: YOUR_IM_CRYPTO_KEY
+
+etcd:
+  endpoints: []
+
+redis:
+  addr: ""
+  addrs: []
+  mode: single
+  password: ""
+  db: 0
+
+live:
+  skipTokenValidate: false
+  tokenKeyPrefix: "live:token:"
+  queueWorkers: 2
+  jwtSalt: "fKoJJ4jgnBXc6vZj4w592HvTDJGd89w2"
+  jwtType: "user"
+  jwtLeeway: 60
+  jwtBlacklistPrefix: "auth:user:blacklist:"
+
+auth:
+  userSigVerifyUrl: ""
+  userSigVerifyTimeout: 3
+  legacyTokenEnabled: false
+
+queue:
+  backend: pulsar
+  consumeFrom: pulsar
+
+pulsar:
+  enabled: true
+  serviceURL: pulsar://127.0.0.1:16650
+  topic: persistent://pte_live/live/im-events
+  subscription: pte-live-im
+  chatTopic: persistent://pte_live/live/chat-events
+  chatSubscription: pte-live-im-chat
+  chatWorkers: 2
+
+cors:
+  enabled: true
+  allowOrigins:
+    - "*"
+  allowCredentials: true

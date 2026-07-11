@@ -1,0 +1,79 @@
+/**
+ * legacy 业务页亮/暗主题：在 legacy 全局 CSS 之后加载，用 Vben 设计令牌覆盖硬编码 #fff。
+ */
+
+.legacy-page-root.subject-wrap,
+.legacy-page-root .subject-wrap,
+.subject-wrap {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+}
+
+.dark {
+  body {
+    background-color: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .legacy-page-root,
+  .legacy-page-root.subject-wrap,
+  .subject-wrap {
+    background: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+  }
+
+  .common-form {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .common-button-wrapper {
+    background: hsl(var(--card)) !important;
+    border-top-color: hsl(var(--border)) !important;
+  }
+
+  .gray3,
+  .gray6,
+  .gray9 {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  .home-container .home-title {
+    color: hsl(var(--primary)) !important;
+  }
+
+  .home-container .home-des {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  .el-table {
+    --el-table-bg-color: hsl(var(--card));
+    --el-table-tr-bg-color: hsl(var(--card));
+    --el-table-header-bg-color: hsl(var(--muted));
+    --el-table-text-color: hsl(var(--foreground));
+    --el-table-header-text-color: hsl(var(--foreground));
+    --el-table-border-color: hsl(var(--border));
+    --el-table-row-hover-bg-color: hsl(var(--accent));
+  }
+
+  .el-card {
+    --el-card-bg-color: hsl(var(--card));
+    border-color: hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+
+  .el-pagination,
+  .el-pagination button,
+  .el-pager li {
+    background: transparent;
+    color: hsl(var(--foreground));
+  }
+
+  .el-dialog {
+    --el-dialog-bg-color: hsl(var(--popover));
+    --el-dialog-title-font-size: 16px;
+  }
+
+  .el-drawer {
+    --el-drawer-bg-color: hsl(var(--popover));
+  }
+}

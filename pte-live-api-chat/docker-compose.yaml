@@ -1,0 +1,37 @@
+name: pte_live_api_chat
+
+services:
+  api-chat:
+    image: pte_live_api_chat:${IMAGE_TAG:-v1}
+    container_name: pte_live_api_chat
+    hostname: api-chat
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APK_MIRROR: ${APK_MIRROR:-mirrors.aliyun.com}
+    volumes:
+      - ${CONFIG_FILE:-./conf/app.yaml}:/data/pte_live_api_chat/conf/app.yaml:ro
+    command: ["./pte_live_api_chat", "-c", "./conf/app.yaml"]
+    ports:
+      - "${CHAT_API_PORT:-11504}:11504"
+    environment:
+      TZ: Asia/Shanghai
+    restart: unless-stopped
+    networks:
+      pte_live_net:
+        ipv4_address: ${PTE_LIVE_API_CHAT_IP:-172.30.0.34}
+        aliases:
+          - api-chat
+          - pte_live_api_chat
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:11504/ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  pte_live_net:
+    external: true
+    name: ${PTE_LIVE_NETWORK:-pte_live_net}

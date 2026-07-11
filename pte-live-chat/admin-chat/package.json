@@ -1,0 +1,52 @@
+{
+  "name": "@pte/admin-chat",
+  "version": "5.7.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm vite build --mode production",
+    "build:analyze": "pnpm vite build --mode analyze",
+    "build:icons": "node scripts/build-iconify-offline.mjs",
+    "dev": "pnpm vite --mode development",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit --skipLibCheck"
+  },
+  "imports": {
+    "#/*": "./src/*"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^2.1.0",
+    "@iconify/vue": "catalog:",
+    "@vben/access": "workspace:*",
+    "@vben/common-ui": "workspace:*",
+    "@vben/constants": "workspace:*",
+    "@vben/hooks": "workspace:*",
+    "@vben/icons": "workspace:*",
+    "@vben/layouts": "workspace:*",
+    "@vben/locales": "workspace:*",
+    "@vben/plugins": "workspace:*",
+    "@vben/preferences": "workspace:*",
+    "@vben/request": "workspace:*",
+    "@vben/stores": "workspace:*",
+    "@vben/styles": "workspace:*",
+    "@vben/types": "workspace:*",
+    "@vben/utils": "workspace:*",
+    "@vueuse/core": "catalog:",
+    "axios": "^1.3.4",
+    "crypto-js": "^4.2.0",
+    "dayjs": "catalog:",
+    "echarts": "^5.4.2",
+    "element-plus": "catalog:",
+    "pinia": "catalog:",
+    "qs": "catalog:",
+    "vue": "catalog:",
+    "vue-router": "catalog:",
+    "vxe-pc-ui": "catalog:",
+    "vxe-table": "catalog:"
+  },
+  "devDependencies": {
+    "@iconify/json": "catalog:",
+    "@iconify/types": "^2.0.0",
+    "unplugin-element-plus": "catalog:"
+  }
+}

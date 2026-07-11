@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package imapi;
+
+option go_package = "pte_live_im/protobuf/imapi";
+
+message ApiReply {
+  int32 code = 1;
+  string msg = 2;
+  string message_id = 3;
+  int32 count = 4;
+  repeated string list = 5;
+}
+
+message RegisterReq {
+  string system_id = 1;
+}
+
+message SendToClientReq {
+  string client_id = 1;
+  string send_user_id = 2;
+  int32 code = 3;
+  string msg = 4;
+  string data = 5;
+}
+
+message SendToClientsReq {
+  repeated string client_ids = 1;
+  string send_user_id = 2;
+  int32 code = 3;
+  string msg = 4;
+  string data = 5;
+}
+
+message BindToGroupReq {
+  string client_id = 1;
+  string group_name = 2;
+  string user_id = 3;
+  string extend = 4;
+}
+
+message SendToGroupReq {
+  string send_user_id = 1;
+  string group_name = 2;
+  int32 code = 3;
+  string msg = 4;
+  string data = 5;
+}
+
+message GetOnlineListReq {
+  string group_name = 1;
+}
+
+message CloseClientReq {
+  string client_id = 1;
+}
+
+service ImApi {
+  rpc Register(RegisterReq) returns (ApiReply);
+  rpc SendToClient(SendToClientReq) returns (ApiReply);
+  rpc SendToClients(SendToClientsReq) returns (ApiReply);
+  rpc BindToGroup(BindToGroupReq) returns (ApiReply);
+  rpc SendToGroup(SendToGroupReq) returns (ApiReply);
+  rpc GetOnlineList(GetOnlineListReq) returns (ApiReply);
+  rpc CloseClient(CloseClientReq) returns (ApiReply);
+}

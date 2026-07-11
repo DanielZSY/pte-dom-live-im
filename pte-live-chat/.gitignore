@@ -1,0 +1,8 @@
+node_modules
+dist
+dist-ssr
+.turbo
+.vben-upstream
+*.local
+.DS_Store
+.e2e-screenshots

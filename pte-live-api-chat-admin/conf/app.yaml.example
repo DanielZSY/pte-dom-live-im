@@ -1,0 +1,38 @@
+# api-chat-admin local example
+
+server:
+  host: ""
+  port: "11505"
+  mode: debug
+
+auth:
+  requestHeader: "authori-zation"
+  adminUsername: "imadmin"
+  adminPassword: "pte123321"
+  tokenSecret: "pte-live-api-chat-admin-dev-secret"
+  tokenTtl: 86400
+
+cluster:
+  enabled: auto
+  podHost: ""
+
+mysql:
+  dsn: ""
+  writeDsn: ""
+  # 开发阶段可以和 writeDsn 填同一个库；生产部署时改为只读实例 DSN。
+  readDsns: []
+  maxOpenConns: 20
+  maxIdleConns: 5
+  connMaxLifetime: 300
+
+redis:
+  addr: "pte_live_redis:6379"
+  addrs:
+    - "pte_live_redis:6379"
+  mode: single
+  password: ""
+  db: 0
+
+im:
+  baseUrls:
+    - "http://pte_live_im:11511"

@@ -1,0 +1,37 @@
+name: pte_live_api_chat_admin
+
+services:
+  api-chat-admin:
+    image: pte_live_api_chat_admin:${IMAGE_TAG:-v1}
+    container_name: pte_live_api_chat_admin
+    hostname: api-chat-admin
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APK_MIRROR: ${APK_MIRROR:-mirrors.aliyun.com}
+    volumes:
+      - ${CONFIG_FILE:-./conf/app.yaml}:/data/pte_live_api_chat_admin/conf/app.yaml:ro
+    command: ["./pte_live_api_chat_admin", "-c", "./conf/app.yaml"]
+    ports:
+      - "${CHAT_ADMIN_PORT:-11505}:11505"
+    environment:
+      TZ: Asia/Shanghai
+    restart: unless-stopped
+    networks:
+      pte_live_net:
+        ipv4_address: ${PTE_LIVE_API_CHAT_ADMIN_IP:-172.30.0.35}
+        aliases:
+          - api-chat-admin
+          - pte_live_api_chat_admin
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:11505/ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  pte_live_net:
+    external: true
+    name: ${PTE_LIVE_NETWORK:-pte_live_net}

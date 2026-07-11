@@ -1,0 +1,8 @@
+node_modules
+.git
+.env
+.env.development
+notify.env
+*.md
+
+# dist/ 必须打入镜像（本地 pack 或上传后 docker build）

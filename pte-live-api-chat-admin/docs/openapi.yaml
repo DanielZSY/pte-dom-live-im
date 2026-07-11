@@ -1,0 +1,465 @@
+openapi: 3.0.3
+info:
+  title: pte-live-api-chat-admin
+  version: 0.6.0
+  description: IM 独立后台 API。提供健康检查、鉴权/RBAC、IM 应用密钥、聊天管理查询、会话/群治理、用户治理、场景消息治理、敏感词治理、在线连接、审计和 outbox 运维查询。
+servers:
+  - url: http://127.0.0.1:11505
+paths:
+  /ping:
+    get:
+      summary: 健康检查
+      responses:
+        "200":
+          description: OK
+  /admin/im/passport/login:
+    post:
+      summary: vben-admin-chat 登录
+      description: 登录前先调用 `/admin/im/passport/captcha` 获取 `captcha_id` 与图形验证码，提交 `username/password/captcha_id/captcha_code`。
+      responses:
+        "200":
+          description: 返回 token 和 user_name
+  /admin/im/passport/captcha:
+    get:
+      summary: 获取登录图形验证码
+      responses:
+        "200":
+          description: 返回 captcha_id、image(data URI) 和 expire_seconds
+  /admin/im/passport/logout:
+    post:
+      summary: vben-admin-chat 登出
+      responses:
+        "200":
+          description: 登出成功
+  /admin/im/auth/session:
+    post:
+      summary: vben-admin-chat session、菜单与权限码
+      responses:
+        "200":
+          description: 返回 user、menus、codes
+  /admin/im/auth/codes:
+    post:
+      summary: vben-admin-chat 权限码
+      responses:
+        "200":
+          description: 返回 codes
+  /admin/im/dashboard/summary:
+    post:
+      summary: IM 后台工作台统计
+      responses:
+        "200":
+          description: 会话、群、消息、用户、在线连接、outbox 统计
+  /admin/im/dashboard/message-trend:
+    post:
+      summary: IM 消息趋势
+      responses:
+        "200":
+          description: 按天/小时统计消息与在线连接趋势
+  /admin/im/dashboard/node-health:
+    post:
+      summary: IM 节点健康
+      responses:
+        "200":
+          description: 节点在线数与连接汇总
+  /admin/im/dashboard/recent-alerts:
+    post:
+      summary: IM 最近告警
+      responses:
+        "200":
+          description: 最近 20 条运维/操作告警
+  /admin/im/app/list:
+    post:
+      summary: 查询 SaaS IM 应用与当前密钥摘要
+      responses:
+        "200":
+          description: im_app 与 active im_app_secret 摘要，不返回明文 secret
+  /admin/im/app/save:
+    post:
+      summary: 保存 IM 应用信息
+      responses:
+        "200":
+          description: 新增或更新 IM 应用信息
+  /admin/im/app/status:
+    post:
+      summary: 启停 IM 应用
+      responses:
+        "200":
+          description: 更新应用状态
+  /admin/im/app/unbind:
+    post:
+      summary: 解除 IM 应用挂载关系
+      responses:
+        "200":
+          description: 清理商户与 IM 应用绑定
+  /admin/im/app/delete:
+    post:
+      summary: 删除 IM 应用
+      responses:
+        "200":
+          description: 删除应用与绑定关系
+  /admin/im/app/ensure:
+    post:
+      summary: 创建或修复业务 App 对应的 IM SDKAppID
+      responses:
+        "200":
+          description: 返回应用与当前密钥摘要
+  /admin/im/app/secret/rotate:
+    post:
+      summary: 轮换 IM 应用密钥
+      responses:
+        "200":
+          description: 旧 active secret 标记为 rotated，新建 active secret
+  /admin/im/app/sig-log/list:
+    post:
+      summary: 查询 UserSig 签发日志
+      responses:
+        "200":
+          description: im_sig_issue_log 分页
+  /admin/im/package/list:
+    post:
+      summary: 查询 IM 套餐列表
+      responses:
+        "200":
+          description: 套餐分页列表
+  /admin/im/package/save:
+    post:
+      summary: 保存 IM 套餐
+      responses:
+        "200":
+          description: 新建或更新套餐
+  /admin/im/package/status:
+    post:
+      summary: 更新 IM 套餐状态
+      responses:
+        "200":
+          description: 套餐启停
+  /admin/im/package/delete:
+    post:
+      summary: 删除 IM 套餐
+      responses:
+        "200":
+          description: 删除指定套餐
+  /admin/im/conversation/list:
+    post:
+      summary: 后台查询会话列表
+      responses:
+        "200":
+          description: chat_conversation 分页，支持 app_id/type/status/keyword
+  /admin/im/conversation/detail:
+    post:
+      summary: 会话详情
+      responses:
+        "200":
+          description: 会话基础字段与聚合成员/消息数
+  /admin/im/conversation/disable:
+    post:
+      summary: 后台封禁会话
+      responses:
+        "200":
+          description: 更新 chat_conversation.status=2，写入 chat_outbox 会话封禁事件和操作审计
+  /admin/im/conversation/enable:
+    post:
+      summary: 后台解封会话
+      responses:
+        "200":
+          description: 更新 chat_conversation.status=1，写入 chat_outbox 会话解封事件和操作审计
+  /admin/im/group/list:
+    post:
+      summary: 后台查询群聊列表
+      responses:
+        "200":
+          description: group 会话分页，支持 app_id/status/keyword
+  /admin/im/group/detail:
+    post:
+      summary: 群组详情
+      responses:
+        "200":
+          description: 群组基础字段与聚合成员/消息数
+  /admin/im/group/member/list:
+    post:
+      summary: 后台查询群成员
+      responses:
+        "200":
+          description: chat_member 分页，按 conversation_id 查询
+  /admin/im/group/member/mute:
+    post:
+      summary: 后台群内禁言成员
+      responses:
+        "200":
+          description: 更新 chat_member.mute_until，写入 chat_outbox 成员禁言事件和操作审计
+  /admin/im/group/member/unmute:
+    post:
+      summary: 后台解除群内禁言
+      responses:
+        "200":
+          description: 更新 chat_member.mute_until=0，写入 chat_outbox 成员解禁事件和操作审计
+  /admin/im/group/member/remove:
+    post:
+      summary: 后台移出群成员
+      responses:
+        "200":
+          description: 更新 chat_member.deleted_at，写入 chat_outbox 成员移出事件和操作审计；不允许移出群主
+  /admin/im/group/member/role/save:
+    post:
+      summary: 后台设置或取消群管理员
+      responses:
+        "200":
+          description: 更新 chat_member.role，写入 chat_outbox 成员角色变更事件和操作审计；不允许修改群主角色
+  /admin/im/message/list:
+    post:
+      summary: 后台查询消息列表
+      responses:
+        "200":
+          description: chat_message 分页，支持 app_id/conversation_id/sender_id/status/msg_type/keyword
+  /admin/im/message/detail:
+    post:
+      summary: 消息详情
+      responses:
+        "200":
+          description: 返回单条消息字段
+  /admin/im/message/recall:
+    post:
+      summary: 后台撤回消息
+      responses:
+        "200":
+          description: 更新 chat_message.status=2，写入 chat_outbox 撤回事件和操作审计
+  /admin/im/message/delete:
+    post:
+      summary: 后台全员删除消息
+      responses:
+        "200":
+          description: 更新 chat_message.status=3，写入 chat_outbox 全员删除事件和操作审计
+  /admin/im/message/receipt/list:
+    post:
+      summary: 后台查询消息送达/已读回执
+      responses:
+        "200":
+          description: chat_message_receipt 分页
+  /admin/im/user/list:
+    post:
+      summary: 后台查询 IM 用户治理列表
+      responses:
+        "200":
+          description: 基于 chat_member 聚合用户会话、未读和治理状态
+  /admin/im/user/detail:
+    post:
+      summary: 用户治理详情
+      responses:
+        "200":
+          description: 用户会话统计与治理状态
+  /admin/im/user/mute:
+    post:
+      summary: 后台禁言 IM 用户
+      responses:
+        "200":
+          description: 写入 im_user_status、chat_outbox 命令和操作审计
+  /admin/im/user/unmute:
+    post:
+      summary: 后台解除 IM 用户禁言
+      responses:
+        "200":
+          description: 写入 im_user_status 和操作审计
+  /admin/im/user/disable:
+    post:
+      summary: 后台禁用 IM 用户
+      responses:
+        "200":
+          description: 写入 im_user_status 和操作审计
+  /admin/im/user/enable:
+    post:
+      summary: 后台启用 IM 用户
+      responses:
+        "200":
+          description: 写入 im_user_status 和操作审计
+  /admin/im/user/kick:
+    post:
+      summary: 后台踢 IM 用户下线
+      responses:
+        "200":
+          description: 写入 chat_outbox 管理命令和操作审计
+  /admin/im/sensitive-word/list:
+    post:
+      summary: 后台查询敏感词规则
+      responses:
+        "200":
+          description: im_sensitive_word 分页，支持 app_id/status/keyword
+  /admin/im/sensitive-word/save:
+    post:
+      summary: 后台保存敏感词规则
+      responses:
+        "200":
+          description: 支持 reject、replace、review 三种动作，写入操作审计
+  /admin/im/sensitive-word/delete:
+    post:
+      summary: 后台停用敏感词规则
+      responses:
+        "200":
+          description: 将 im_sensitive_word.status 更新为 0
+  /admin/im/sensitive-hit/list:
+    post:
+      summary: 后台查询敏感词命中日志
+      responses:
+        "200":
+          description: im_sensitive_hit 分页，支持 app_id/keyword
+  /admin/im/scene-message/list:
+    post:
+      summary: 后台查询场景消息
+      responses:
+        "200":
+          description: 统一查询电商直播弹幕和 show/voice 场景事件，支持 scene_type、app_id、room_id、live_id、session_id、event_type、user_id、status、keyword 分页筛选
+  /admin/im/scene-message/detail:
+    post:
+      summary: 后台查询场景消息详情
+      responses:
+        "200":
+          description: 返回单条电商直播弹幕或 show/voice 场景事件详情，统一补充 scene_type、event_id、deleted 等展示字段
+  /admin/im/scene-message/audit:
+    post:
+      summary: 后台审核电商直播弹幕
+      responses:
+        "200":
+          description: 更新 pte_live_app_wx_live_danmaku 审核状态，支持 approve/reject/delete，写入操作审计
+  /admin/im/scene-message/delete:
+    post:
+      summary: 后台删除场景消息
+      responses:
+        "200":
+          description: 电商弹幕标记 audit_status=3；show/voice 事件写入 payload.admin_deleted 并投递 scene.message.deleted 管理命令，不做物理删除
+  /admin/im/connection/online:
+    post:
+      summary: 后台查询在线连接列表
+      responses:
+        "200":
+          description: im_connection_snapshot 在线连接分页
+  /admin/im/connection/detail:
+    post:
+      summary: 连接详情
+      responses:
+        "200":
+          description: 返回单条连接快照明细
+  /admin/im/connection/kick:
+    post:
+      summary: 后台踢在线连接下线
+      responses:
+        "200":
+          description: 更新连接快照、写入 chat_outbox 管理命令和操作审计
+  /admin/im/outbox/list:
+    post:
+      summary: 后台查询 outbox 列表
+      responses:
+        "200":
+          description: chat_outbox 分页
+  /admin/im/outbox/detail:
+    post:
+      summary: 后台查询 outbox 详情
+      responses:
+        "200":
+          description: chat_outbox 单条详情
+  /admin/im/outbox/retry:
+    post:
+      summary: 手动重试 outbox 事件
+      responses:
+        "200":
+          description: affected
+  /admin/im/outbox/ignore:
+    post:
+      summary: 标记忽略 outbox 事件
+      responses:
+        "200":
+          description: affected
+  /admin/im/mq/metrics:
+    post:
+      summary: 查询 MQ/outbox 运维指标
+      responses:
+        "200":
+          description: outbox 总量、待投递、投递中、失败、死信、卡锁、最长积压秒和事件类型分布
+  /admin/im/node/list:
+    post:
+      summary: 后台查询 IM 节点列表
+      responses:
+        "200":
+          description: 优先从 im 实时连接聚合节点在线数，失败时回退 im_connection_snapshot 聚合
+  /admin/im/audit/login-log/list:
+    post:
+      summary: 后台查询登录日志
+      responses:
+        "200":
+          description: im_admin_operation_log 中 action=admin.login 的分页记录
+  /admin/im/audit/operation-log/list:
+    post:
+      summary: 后台查询操作审计日志
+      responses:
+        "200":
+          description: im_admin_operation_log 分页
+  /admin/im/rbac/admin-user/list:
+    post:
+      summary: 后台查询 IM 管理员列表
+      responses:
+        "200":
+          description: im_admin_user 分页
+  /admin/im/rbac/admin-user/save:
+    post:
+      summary: 后台保存 IM 管理员
+      responses:
+        "200":
+          description: affected
+  /admin/im/rbac/admin-user/disable:
+    post:
+      summary: 后台启用或禁用 IM 管理员
+      responses:
+        "200":
+          description: affected
+  /admin/im/rbac/admin-user/reset-password:
+    post:
+      summary: 后台重置 IM 管理员密码
+      responses:
+        "200":
+          description: affected
+  /admin/im/rbac/role/list:
+    post:
+      summary: 后台查询 IM 角色列表
+      responses:
+        "200":
+          description: im_admin_role 分页
+  /admin/im/rbac/role/save:
+    post:
+      summary: 后台保存 IM 角色
+      responses:
+        "200":
+          description: affected
+  /admin/im/rbac/role/delete:
+    post:
+      summary: 后台删除 IM 角色
+      responses:
+        "200":
+          description: affected
+  /admin/im/rbac/role/access/save:
+    post:
+      summary: 后台保存 IM 角色权限
+      responses:
+        "200":
+          description: affected
+  /admin/im/rbac/access/list:
+    post:
+      summary: 后台查询 IM 权限点列表
+      responses:
+        "200":
+          description: im_admin_access 分页
+  /admin/im/rbac/access/save:
+    post:
+      summary: 后台保存 IM 权限点
+      responses:
+        "200":
+          description: affected
+  /admin/im/rbac/access/delete:
+    post:
+      summary: 后台删除 IM 权限点
+      responses:
+        "200":
+          description: affected
+  /admin/im/rbac/access/tree:
+    post:
+      summary: 后台查询 IM 权限点树
+      responses:
+        "200":
+          description: 返回当前内置权限码树

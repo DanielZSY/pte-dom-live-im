@@ -1,0 +1,8 @@
+/conf/app.yaml
+/conf/app.docker.yaml
+/conf/app.cluster.yaml
+/build/
+/dist/
+.env
+*.exe
+.DS_Store

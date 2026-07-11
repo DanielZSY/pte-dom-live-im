@@ -1,0 +1,9 @@
+node_modules
+.git
+.vben-upstream
+**/.turbo
+**/dist
+**/.env.local
+**/.env.*.local
+**/coverage
+**/*.log

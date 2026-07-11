@@ -1,0 +1,323 @@
+openapi: 3.0.3
+info:
+  title: pte-live-api-chat
+  version: 0.3.0
+  description: 聊天与场景消息 API。提供 UserSig 鉴权、单聊/群聊会话、成员、消息、已读、撤回、删除、引用字段、电商直播场景消息，娱乐直播/语聊房房间、成员、麦位、PK、礼物/音效事件，以及 outbox 到 im 的 HTTP/Pulsar 可靠投递 worker。
+servers:
+  - url: http://127.0.0.1:11504
+paths:
+  /ping:
+    get:
+      summary: 健康检查
+      responses:
+        "200":
+          description: OK
+  /healthz:
+    get:
+      summary: 容器存活检查
+      responses:
+        "200":
+          description: 服务进程存活
+  /readyz:
+    get:
+      summary: 容器就绪检查
+      responses:
+        "200":
+          description: MySQL 与 chat-domain 已就绪
+        "503":
+          description: 依赖未就绪，不应接入流量
+  /metrics:
+    get:
+      summary: Prometheus 指标
+      responses:
+        "200":
+          description: text/plain Prometheus metrics
+  /api/internal/ops/metrics:
+    get:
+      summary: JSON 运维指标
+      responses:
+        "200":
+          description: DB 连接池、chat-domain 总量、outbox 状态和最长积压秒
+  /api/v1/im/usersig:
+    post:
+      summary: 获取腾讯云风格 UserSig 连接凭证
+      description: SaaS 商户客户端鉴权接口。服务端按业务 app_id 自动分配或读取 SDKAppID/Secret，返回 user_sig；客户端用 sdkAppID + identifier + userSig 连接 pte-live-im /ws。
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                app_id:
+                  type: integer
+                  example: 10001
+                user_id:
+                  type: integer
+                  example: 10086
+                identifier:
+                  type: string
+                  example: user_10086
+                user_type:
+                  type: string
+                  example: user
+                device_id:
+                  type: string
+                  example: ios-1
+                platform:
+                  type: string
+                  example: app
+                scene:
+                  type: string
+                  example: chat
+                expire:
+                  type: integer
+                  description: 有效期秒，默认 86400，最大 604800。
+      responses:
+        "200":
+          description: UserSig payload
+  /api/internal/im/usersig/verify:
+    post:
+      summary: 内部校验 UserSig
+      description: pte-live-im 握手时调用；客户端不直接调用。校验通过后返回业务 app_id、sdk_app_id、identifier、user_id。
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [sdk_app_id, identifier, user_sig]
+              properties:
+                sdk_app_id:
+                  type: string
+                  example: "1400010001"
+                identifier:
+                  type: string
+                  example: user_10086
+                user_sig:
+                  type: string
+      responses:
+        "200":
+          description: verify result
+  /api/v1/chat/conversation/open-single:
+    post:
+      summary: 打开或创建单聊会话
+      responses:
+        "200":
+          description: 会话详情
+  /api/v1/chat/conversation/create-group:
+    post:
+      summary: 创建群聊会话
+      responses:
+        "200":
+          description: 群聊会话详情
+  /api/v1/chat/conversation/list:
+    post:
+      summary: 查询用户会话列表
+      responses:
+        "200":
+          description: 会话分页
+  /api/v1/chat/conversation/detail:
+    post:
+      summary: 查询会话详情
+      responses:
+        "200":
+          description: 会话与成员
+  /api/v1/chat/conversation/read:
+    post:
+      summary: 上报会话已读游标
+      responses:
+        "200":
+          description: OK
+  /api/v1/chat/member/list:
+    post:
+      summary: 查询会话成员
+      responses:
+        "200":
+          description: 成员列表
+  /api/v1/chat/member/add:
+    post:
+      summary: 群聊添加成员
+      responses:
+        "200":
+          description: OK
+  /api/v1/chat/member/remove:
+    post:
+      summary: 群聊移除成员
+      responses:
+        "200":
+          description: OK
+  /api/v1/chat/message/send:
+    post:
+      summary: 发送单聊/群聊消息
+      responses:
+        "200":
+          description: 消息详情；client_msg_id 幂等
+  /api/v1/chat/message/history:
+    post:
+      summary: 查询消息历史
+      responses:
+        "200":
+          description: 消息列表
+  /api/v1/chat/message/sync:
+    post:
+      summary: 同步会话增量消息
+      description: 客户端断线重连或多端同步时传入 conversation_id 与 after_seq，返回 seq 更大的消息、next_seq 与 has_more。
+      responses:
+        "200":
+          description: 增量消息列表
+  /api/v1/chat/message/ack:
+    post:
+      summary: 上报消息投递或已读 ACK
+      description: 客户端收到消息后上报 delivered；消息被读后上报 read。read ACK 会同步推进会话已读游标与未读计数。
+      responses:
+        "200":
+          description: OK
+  /api/v1/chat/message/recall:
+    post:
+      summary: 撤回消息
+      responses:
+        "200":
+          description: 撤回后的消息状态
+  /api/v1/chat/message/delete:
+    post:
+      summary: 删除自己的消息视图
+      responses:
+        "200":
+          description: OK
+  /api/v1/scene/shop/message/send:
+    post:
+      summary: 发送电商直播场景消息
+      responses:
+        "200":
+          description: 兼容 UserDanmakuSendResult；MySQL 已配置时写弹幕表，未初始化或 shadow 请求返回错误。
+  /api/v1/scene/shop/message/recent:
+    post:
+      summary: 查询最近电商直播场景消息
+      responses:
+        "200":
+          description: 列表
+  /api/v1/scene/shop/message/history:
+    post:
+      summary: 查询电商直播场次消息历史
+      responses:
+        "200":
+          description: 列表
+  /api/v1/scene/shop/message/audit/list:
+    post:
+      summary: 查询电商直播消息审核列表
+      responses:
+        "200":
+          description: 列表
+  /api/v1/scene/shop/message/audit/count:
+    post:
+      summary: 查询电商直播待审消息数量
+      responses:
+        "200":
+          description: 数量
+  /api/v1/scene/shop/message/audit/submit:
+    post:
+      summary: 提交电商直播消息审核动作
+      responses:
+        "200":
+          description: 影响数量
+  /api/v1/scene/room/open:
+    post:
+      summary: 创建或恢复娱乐直播/语聊房房间
+      description: body 需传 scene_type=show/voice；别名路径 /api/v1/scene/show/room/open、/api/v1/scene/voice/room/open 可省略 scene_type。
+      responses:
+        "200":
+          description: 房间详情、成员、麦位、当前 PK
+  /api/v1/scene/room/close:
+    post:
+      summary: 关闭娱乐直播/语聊房房间
+      responses:
+        "200":
+          description: 房间状态
+  /api/v1/scene/room/list:
+    post:
+      summary: 查询娱乐直播/语聊房房间列表
+      responses:
+        "200":
+          description: 房间分页
+  /api/v1/scene/room/detail:
+    post:
+      summary: 查询娱乐直播/语聊房房间详情
+      responses:
+        "200":
+          description: 房间、观众、麦位、PK
+  /api/v1/scene/room/enter:
+    post:
+      summary: 进入娱乐直播/语聊房
+      description: 进入房间只写成员状态并产生 scene.member.entered 事件；WebSocket 长连接仍走统一 /ws，客户端随后发送 scene.enter 订阅 group。
+      responses:
+        "200":
+          description: 成员状态
+  /api/v1/scene/room/leave:
+    post:
+      summary: 离开娱乐直播/语聊房
+      responses:
+        "200":
+          description: OK
+  /api/v1/scene/member/list:
+    post:
+      summary: 查询观众/成员列表
+      responses:
+        "200":
+          description: 成员列表
+  /api/v1/scene/seat/action:
+    post:
+      summary: 麦位动作
+      description: action 支持 apply、invite、take、accept、reject、cancel、timeout、leave、kick、lock、unlock、mute、unmute。适用于视频直播观众连线、主播连线，以及语聊房上麦/下麦/闭麦。
+      responses:
+        "200":
+          description: 最新麦位列表
+  /api/v1/scene/moderation/action:
+    post:
+      summary: 场景房间成员治理
+      description: action 支持 mute、unmute、kick。mute 可传 duration 秒数；kick 会释放目标用户麦位并广播治理事件。
+      responses:
+        "200":
+          description: 成员状态
+  /api/v1/scene/pk/start:
+    post:
+      summary: 直接开始主播连线或 PK
+      description: 适合服务端已完成双方确认后直接进入 active 的场景。
+      responses:
+        "200":
+          description: PK 状态
+  /api/v1/scene/pk/invite:
+    post:
+      summary: 发起主播连线或 PK 邀请
+      description: 创建 inviting 状态，广播 scene.pk.invited；被邀请方可通过 pk/action accept/reject。
+      responses:
+        "200":
+          description: PK 邀请状态
+  /api/v1/scene/pk/action:
+    post:
+      summary: 处理主播连线或 PK 动作
+      description: action 支持 accept、reject、timeout、score。accept 将 inviting 转为 active；score 更新比分并广播。
+      responses:
+        "200":
+          description: PK 状态
+  /api/v1/scene/pk/end:
+    post:
+      summary: 结束、取消或结算主播连线/PK
+      description: action 支持 end、cancel、settle；settle 会广播 scene.pk.settled。
+      responses:
+        "200":
+          description: PK 状态
+  /api/v1/scene/event/send:
+    post:
+      summary: 发送场景事件
+      description: 用于弹幕、礼物、音效、房间公告、机器人消息等扩展事件。event_type 建议使用 scene.gift.sent、scene.effect.played、scene.message.sent。
+      responses:
+        "200":
+          description: 场景事件
+  /api/v1/scene/event/list:
+    post:
+      summary: 查询场景事件回放
+      description: 支持按 event_type、before_id、page/page_size 查询，用于房间回放、后台审核和客户端断线补拉。
+      responses:
+        "200":
+          description: 场景事件分页

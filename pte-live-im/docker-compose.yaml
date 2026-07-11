@@ -1,0 +1,39 @@
+name: pte_live_api_im
+
+services:
+  api-im:
+    image: pte_live_api_im:${IMAGE_TAG:-v1}
+    container_name: pte_live_api_im
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APK_MIRROR: ${APK_MIRROR:-mirrors.aliyun.com}
+    volumes:
+      - ${IM_CONFIG_FILE:-./conf/app.yaml}:/data/pte_live_im/conf/app.yaml:ro
+    command: ["/data/pte_live_im/pte_live_im", "-c", "/data/pte_live_im/conf/app.yaml"]
+    ports:
+      - "${WS_PORT:-11510}:11510"
+      - "${HTTP_PORT:-11511}:11511"
+      - "${RPC_PORT:-11512}:11512"
+    environment:
+      TZ: Asia/Shanghai
+      IM_LOCAL_HOST: ${IM_LOCAL_HOST:-api-im}
+    restart: unless-stopped
+    networks:
+      pte_live_net:
+        ipv4_address: ${PTE_LIVE_API_IM_IP:-172.30.0.20}
+        aliases:
+          - api-im
+          - pte_live_api_im
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:11511/ping"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+networks:
+  pte_live_net:
+    external: true
+    name: ${PTE_LIVE_NETWORK:-pte_live_net}

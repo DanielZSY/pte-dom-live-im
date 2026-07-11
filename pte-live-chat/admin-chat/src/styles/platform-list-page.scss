@@ -1,0 +1,77 @@
+/* vben-admin-chat 列表页：Vben useVbenVxeGrid + platform-vxe-grid */
+
+.platform-list-page--embedded {
+  display: flex;
+  flex-direction: column;
+  min-height: 360px;
+  max-height: min(560px, calc(70vh - 120px));
+  overflow: auto;
+}
+
+.platform-vxe-grid.vxe-grid {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.platform-vxe-grid .vxe-grid--layout-body-content-wrapper,
+.platform-vxe-grid .vxe-table--render-wrapper,
+.platform-vxe-grid .vxe-table--main-wrapper {
+  max-height: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.platform-vxe-grid .vxe-grid--table-container {
+  max-height: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+}
+
+.platform-vxe-grid .vxe-table--body-wrapper,
+.platform-vxe-grid .vxe-table--body-inner-wrapper {
+  max-height: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+}
+
+.platform-vxe-grid .vxe-table--fixed-right-wrapper,
+.platform-vxe-grid .vxe-table--fixed-left-wrapper {
+  overflow: hidden;
+}
+
+.platform-vxe-grid .vxe-grid--pager-wrapper {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: flex-end;
+  padding-top: 12px;
+}
+
+/* 行高随内容增高（需 grid showOverflow: false） */
+.platform-vxe-grid .vxe-body--column .vxe-cell {
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.platform-vxe-grid .vxe-body--column.col--ellipsis,
+.platform-vxe-grid .vxe-body--column.col--ellipsis .vxe-cell {
+  height: auto !important;
+  max-height: none !important;
+  text-overflow: clip;
+}
+
+.platform-vxe-grid .vxe-header--column .vxe-cell {
+  white-space: nowrap;
+}
+
+.platform-list-page--embedded .platform-vxe-grid .vxe-grid--table-container {
+  flex: 1;
+  min-height: 0;
+}

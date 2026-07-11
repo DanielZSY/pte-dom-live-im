@@ -1,0 +1,34 @@
+# IM 后台前端：共用 pte_live_net
+# 先启动 api-chat-admin，再启动 admin-chat
+
+name: pte_live
+
+services:
+  admin-chat:
+    image: pte_live_admin_chat:${IMAGE_TAG:-v1}
+    container_name: pte_live_admin_chat
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APK_MIRROR: ${APK_MIRROR:-mirrors.aliyun.com}
+    ports:
+      - "${ADMIN_CHAT_PORT:-11526}:80"
+    restart: unless-stopped
+    networks:
+      pte_live_net:
+        ipv4_address: 172.30.0.54
+        aliases:
+          - admin-chat
+          - pte_live_admin_chat
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+networks:
+  pte_live_net:
+    name: pte_live_net
+    external: true

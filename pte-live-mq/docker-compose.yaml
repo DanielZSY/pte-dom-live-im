@@ -1,0 +1,44 @@
+name: pte_live_mq
+
+services:
+  mq-pulsar:
+    image: ${PULSAR_IMAGE:-apachepulsar/pulsar:3.3.3}
+    container_name: pte_live_mq_pulsar
+    hostname: mq-pulsar
+    restart: unless-stopped
+    command: bin/pulsar standalone
+    environment:
+      PULSAR_MEM: ${PULSAR_MEM:--Xms512m -Xmx512m -XX:MaxDirectMemorySize=512m}
+      PULSAR_GC: ${PULSAR_GC:--XX:+UseG1GC}
+      TZ: Asia/Shanghai
+    ports:
+      - "${PULSAR_PORT:-16650}:6650"
+      - "${PULSAR_HTTP_PORT:-18080}:8080"
+    volumes:
+      - pte_live_mq_pulsar_data:/pulsar/data
+    networks:
+      pte_live_net:
+        ipv4_address: ${PTE_LIVE_MQ_PULSAR_IP:-172.30.0.13}
+        aliases:
+          - mq-pulsar
+          - pte_live_mq_pulsar
+          - pte_live_pulsar
+    healthcheck:
+      test: ["CMD", "bin/pulsar-admin", "brokers", "healthcheck"]
+      interval: 20s
+      timeout: 15s
+      retries: 12
+      start_period: 90s
+
+networks:
+  pte_live_net:
+    name: ${PTE_LIVE_NETWORK:-pte_live_net}
+    ipam:
+      driver: default
+      config:
+        - subnet: ${PTE_LIVE_SUBNET:-172.30.0.0/24}
+          gateway: ${PTE_LIVE_GATEWAY:-172.30.0.1}
+
+volumes:
+  pte_live_mq_pulsar_data:
+    name: pte_live_mq_pulsar_data

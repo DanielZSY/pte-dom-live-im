@@ -1,0 +1,52 @@
+# api-chat local example
+# 当前骨架版本主要读取环境变量；本文件用于对齐其他 Go 服务的 -c 参数习惯。
+
+cluster:
+  enabled: auto
+  podHost: ""
+
+server:
+  host: ""
+  port: "11504"
+  mode: debug
+
+mysql:
+  dsn: ""
+  writeDsn: ""
+  readDsns: []
+  maxOpenConns: 20
+  maxIdleConns: 5
+  connMaxLifetime: 300
+
+redis:
+  addr: "pte_live_redis:6379"
+  addrs:
+    - "pte_live_redis:6379"
+  mode: single
+  password: ""
+  db: 0
+
+im:
+  wsUrl: "ws://127.0.0.1:11510/ws"
+  httpUrl: "http://127.0.0.1:11511"
+  deliverPath: "/api/chat/deliver"
+  # http | pulsar | both
+  deliverBackend: "http"
+  pulsarServiceUrl: ""
+  pulsarTopic: "persistent://pte_live/live/chat-events"
+  outboxEnabled: true
+  outboxWorkers: 2
+  outboxBatchSize: 20
+  outboxInterval: 2
+  outboxLockTtl: 60
+  outboxMaxRetries: 10
+
+scene:
+  timeoutWorkerEnabled: true
+  timeoutInterval: 5
+  timeoutBatchSize: 100
+  micRequestTtl: 60
+  pkInviteTtl: 60
+
+auth:
+  requestHeader: "authori-zation"
