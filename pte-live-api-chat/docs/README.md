@@ -1,9 +1,5 @@
-# api-chat OpenAPI
+# api-chat Swagger
 
-当前 OpenAPI 先手工维护最小契约；shop 场景消息已接入弹幕表真实读写路径，show/voice 已提供房间、成员、麦位、PK 与事件接口。
+`openapi.yaml` 是当前 `api/router/router.go` 的 REST 契约，覆盖 UserSig、会话、消息、电商直播弹幕、娱乐直播与语聊房场景接口。
 
-IM 鉴权统一使用腾讯云风格 UserSig：客户端调用 `/api/v1/im/usersig` 获取 `sdkAppID / identifier / userSig`，im-core 握手时调用内部 `/api/internal/im/usersig/verify` 校验。
-
-`X-Chat-Proxy-Mode: shadow` 不再产生兼容成功响应。生产链路必须真实落库、写 outbox，并由 worker 投递到 im；未初始化时接口返回错误。
-
-后续接入 `pte-live-doc` 后，同步增加 `make doc-generate-api-chat` 和 Swagger 11555。
+导入 Swagger UI、Postman 或 Apifox 时，开发服务地址为 `http://127.0.0.1:11504`，生产地址为 `https://api-chat.ptelive.com`。内部路径 `/api/internal/*` 不应暴露到公网。

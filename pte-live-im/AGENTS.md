@@ -14,7 +14,7 @@
 ## pte-live-im 项目边界
 
 - 本项目是独立 IM 项目集合，只包含 IM API、WebSocket、gRPC、聊天业务、IM 管理后台与 MQ 相关服务。
-- Docker Compose 默认只启动 `api-im` 和 `mq-pulsar`。
+- `pte-live-mq/docker-compose.yaml` 创建网络并启动 `mq-pulsar`；`pte-live-im/docker-compose.yaml` 只启动 `api-im`。
 - 本项目定义统一 Docker 网络 `pte_live_net`，子网 `172.30.0.0/24`，网关 `172.30.0.1`。
 - 本仓库不包含外部商城 API 或外部业务项目代码。
 - 不要让 IM 代码硬编码外部业务系统数据库、发布目录或内部实现；外部系统只能通过 HTTP / gRPC / WebSocket / MQ 协议接入 IM。

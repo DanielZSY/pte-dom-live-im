@@ -1,9 +1,10 @@
 openapi: 3.0.3
 info:
   title: pte-live-api-chat
-  version: 0.3.0
+  version: 1.0.0
   description: 聊天与场景消息 API。提供 UserSig 鉴权、单聊/群聊会话、成员、消息、已读、撤回、删除、引用字段、电商直播场景消息，娱乐直播/语聊房房间、成员、麦位、PK、礼物/音效事件，以及 outbox 到 im 的 HTTP/Pulsar 可靠投递 worker。
 servers:
+  - url: https://api-chat.ptelive.com
   - url: http://127.0.0.1:11504
 paths:
   /ping:
@@ -321,3 +322,63 @@ paths:
       responses:
         "200":
           description: 场景事件分页
+  /api/v1/scene/show/room/open:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1open'
+  /api/v1/scene/show/room/close:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1close'
+  /api/v1/scene/show/room/list:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1list'
+  /api/v1/scene/show/room/detail:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1detail'
+  /api/v1/scene/show/room/enter:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1enter'
+  /api/v1/scene/show/room/leave:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1leave'
+  /api/v1/scene/show/member/list:
+    $ref: '#/paths/~1api~1v1~1scene~1member~1list'
+  /api/v1/scene/show/seat/action:
+    $ref: '#/paths/~1api~1v1~1scene~1seat~1action'
+  /api/v1/scene/show/moderation/action:
+    $ref: '#/paths/~1api~1v1~1scene~1moderation~1action'
+  /api/v1/scene/show/pk/invite:
+    $ref: '#/paths/~1api~1v1~1scene~1pk~1invite'
+  /api/v1/scene/show/pk/start:
+    $ref: '#/paths/~1api~1v1~1scene~1pk~1start'
+  /api/v1/scene/show/pk/action:
+    $ref: '#/paths/~1api~1v1~1scene~1pk~1action'
+  /api/v1/scene/show/pk/end:
+    $ref: '#/paths/~1api~1v1~1scene~1pk~1end'
+  /api/v1/scene/show/event/send:
+    $ref: '#/paths/~1api~1v1~1scene~1event~1send'
+  /api/v1/scene/show/event/list:
+    $ref: '#/paths/~1api~1v1~1scene~1event~1list'
+  /api/v1/scene/voice/room/open:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1open'
+  /api/v1/scene/voice/room/close:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1close'
+  /api/v1/scene/voice/room/list:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1list'
+  /api/v1/scene/voice/room/detail:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1detail'
+  /api/v1/scene/voice/room/enter:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1enter'
+  /api/v1/scene/voice/room/leave:
+    $ref: '#/paths/~1api~1v1~1scene~1room~1leave'
+  /api/v1/scene/voice/member/list:
+    $ref: '#/paths/~1api~1v1~1scene~1member~1list'
+  /api/v1/scene/voice/seat/action:
+    $ref: '#/paths/~1api~1v1~1scene~1seat~1action'
+  /api/v1/scene/voice/moderation/action:
+    $ref: '#/paths/~1api~1v1~1scene~1moderation~1action'
+  /api/v1/scene/voice/pk/invite:
+    $ref: '#/paths/~1api~1v1~1scene~1pk~1invite'
+  /api/v1/scene/voice/pk/start:
+    $ref: '#/paths/~1api~1v1~1scene~1pk~1start'
+  /api/v1/scene/voice/pk/action:
+    $ref: '#/paths/~1api~1v1~1scene~1pk~1action'
+  /api/v1/scene/voice/pk/end:
+    $ref: '#/paths/~1api~1v1~1scene~1pk~1end'
+  /api/v1/scene/voice/event/send:
+    $ref: '#/paths/~1api~1v1~1scene~1event~1send'
+  /api/v1/scene/voice/event/list:
+    $ref: '#/paths/~1api~1v1~1scene~1event~1list'

@@ -1,9 +1,10 @@
 openapi: 3.0.3
 info:
   title: pte-live-api-chat-admin
-  version: 0.6.0
+  version: 1.0.0
   description: IM 独立后台 API。提供健康检查、鉴权/RBAC、IM 应用密钥、聊天管理查询、会话/群治理、用户治理、场景消息治理、敏感词治理、在线连接、审计和 outbox 运维查询。
 servers:
+  - url: https://api-chat-admin.ptelive.com
   - url: http://127.0.0.1:11505
 paths:
   /ping:
@@ -103,6 +104,18 @@ paths:
       responses:
         "200":
           description: 返回应用与当前密钥摘要
+  /admin/im/app/associate:
+    post:
+      summary: 关联业务应用与 IM 应用
+      responses:
+        "200":
+          description: 关联结果
+  /admin/im/app/secret/detail:
+    post:
+      summary: 查询 IM 应用密钥摘要
+      responses:
+        "200":
+          description: keyId、版本和状态，不返回明文 secret
   /admin/im/app/secret/rotate:
     post:
       summary: 轮换 IM 应用密钥

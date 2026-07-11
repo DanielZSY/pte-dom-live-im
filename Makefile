@@ -3,7 +3,7 @@ SHELL := /bin/bash
 
 ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 
-.PHONY: help local-mq-up local-mq-down local-db-up local-db-down local-sql-load local-im-up local-im-down local-api-chat-run local-api-chat-up local-api-chat-down local-api-chat-admin-run local-api-chat-admin-up local-api-chat-admin-down local-admin-chat-dev local-admin-chat-up local-admin-chat-down local-admin-chat-build local-compose-check deploy-mq-up deploy-mq-down deploy-db-up deploy-db-down deploy-sql-load deploy-im-up deploy-im-down deploy-api-chat-up deploy-api-chat-down deploy-api-chat-admin-up deploy-api-chat-admin-down deploy-admin-chat-up deploy-admin-chat-down deploy-all deploy-compose-check im-up im-down mq-up api-chat-run api-chat-admin-run chat-dev chat-build compose-check scan-clean
+.PHONY: help local-mq-up local-mq-down local-db-up local-db-down local-sql-load local-im-up local-im-down local-api-chat-run local-api-chat-up local-api-chat-down local-api-chat-admin-run local-api-chat-admin-up local-api-chat-admin-down local-admin-chat-dev local-admin-chat-up local-admin-chat-down local-admin-chat-build local-compose-check swagger-check deploy-mq-up deploy-mq-down deploy-db-up deploy-db-down deploy-sql-load deploy-im-up deploy-im-down deploy-api-chat-up deploy-api-chat-down deploy-api-chat-admin-up deploy-api-chat-admin-down deploy-admin-chat-up deploy-admin-chat-down deploy-all deploy-compose-check im-up im-down mq-up api-chat-run api-chat-admin-run chat-dev chat-build compose-check scan-clean
 
 help:
 	@echo ""
@@ -33,6 +33,7 @@ help:
 	@echo ""
 	@echo "校验："
 	@echo "  make local-compose-check         校验全部 compose"
+	@echo "  make swagger-check               校验 Swagger 覆盖全部 HTTP 路由"
 	@echo "  make scan-clean                  扫描不应提交的缓存文件"
 	@echo ""
 local-mq-up:
@@ -93,6 +94,9 @@ local-compose-check:
 	@docker compose -f "$(ROOT_DIR)/pte-live-api-chat/docker-compose.yaml" config --quiet
 	@docker compose -f "$(ROOT_DIR)/pte-live-api-chat-admin/docker-compose.yaml" config --quiet
 	@docker compose -f "$(ROOT_DIR)/pte-live-chat/admin-chat/docker-compose.yaml" config --quiet
+
+swagger-check:
+	@ruby "$(ROOT_DIR)/scripts/swagger_check.rb"
 
 # deploy-* 与 local-* 同构，方便服务器脚本统一调用。
 deploy-mq-up:

@@ -1,659 +1,139 @@
 openapi: 3.0.3
 info:
-  title: pte-live-im API
-  version: 0.2.0
-  description: "pte-live-im 分布式 WebSocket 推送服务接口文档。\n\n## 服务地址\n\n| 服务 | 地址 |\n|------|------|\n| WebSocket | `ws://127.0.0.1:11510/ws` |\n| HTTP API | `http://127.0.0.1:11511` |\n| gRPC (ImApi) | `127.0.0.1:11512` |\n| Swagger UI | `http://127.0.0.1:11552`\
-    \ |\n\n## WebSocket\n\n连接地址：`ws://127.0.0.1:11510/ws`\n\n推荐使用腾讯云风格 UserSig：客户端先调用 api-chat `/api/v1/im/usersig`，再携带 `sdkAppID + identifier + userSig` 建立 `/ws`。生产默认关闭旧 `AppId + token` 鉴权。\n\n示例：`ws://127.0.0.1:11510/ws?sdkAppID=1400010001&identifier=user_10086&userSig=xxx`\n\n连接成功后返回 `clientId`、`userId`、`sdkAppID`、`identifier`，供后续单发消息使用。\n\n下行推送 JSON 格式：\n\n```json\n{\n  \"messageId\": \"5b4646dd8328f4b1\"\
-    ,\n  \"sendUserId\": \"user001\",\n  \"code\": 1001,\n  \"msg\": \"hello\",\n  \"data\": \"消息内容\"\n}\n```\n\n## gRPC (ImApi)\n\
-    \n- **Proto：** `protobuf/im_api.proto`\n- **地址：** `127.0.0.1:11512`\n- 除 `Register` 外，metadata 需携带 `appid`（等同 HTTP Header\
-    \ `AppId`）\n\n| RPC | 说明 |\n|-----|------|\n| `imapi.ImApi/Register` | 注册 appId |\n| `imapi.ImApi/SendToClient` | 单发 |\n\
-    | `imapi.ImApi/SendToClients` | 批量单发 |\n| `imapi.ImApi/BindToGroup` | 绑定分组 |\n| `imapi.ImApi/SendToGroup` | 分组群发 |\n|\
-    \ `imapi.ImApi/GetOnlineList` | 分组在线列表 |\n| `imapi.ImApi/CloseClient` | 关闭连接 |\n\n详细字段见 Markdown 文档 `docs/api.md`。\n"
+  title: pte-live-api-im
+  version: 1.0.0
+  description: IM 连接层 HTTP API。WebSocket 连接地址为 wss://im.ptelive.com/ws；除注册接口外，HTTP API 使用 AccessToken 鉴权。
 servers:
-- url: http://127.0.0.1:11511
-  description: HTTP API（本地 / Docker 宿主机）
-tags:
-- name: account
-  description: 业务系统注册
-- name: message
-  description: 消息推送
-- name: group
-  description: 分组管理
-- name: client
-  description: 连接管理
-- name: admin
-  description: IM 内部管理接口（api-chat-admin 调用）
-- name: live
-  description: 电商直播 HTTP 扩展
-- name: health
-  description: 健康检查
-components:
-  parameters:
-    AppIdHeader:
-      name: AppId
-      in: header
-      required: true
-      schema:
-        type: string
-      description: 已注册的业务租户 ID（兼容旧 Header SystemId）
-  schemas:
-    ApiResponse:
-      type: object
-      properties:
-        code:
-          type: integer
-          description: 0 成功，-1 失败
-          example: 0
-        msg:
-          type: string
-          example: success
-        data:
-          description: 业务数据
-    RegisterRequest:
-      type: object
-      required:
-      - appId
-      properties:
-        appId:
-          type: string
-          description: 业务租户 ID
-          example: my-app
-        systemId:
-          type: string
-          description: 兼容旧字段，等同 appId
-          deprecated: true
-    SendToClientRequest:
-      type: object
-      required:
-      - clientId
-      - code
-      - msg
-      - data
-      properties:
-        clientId:
-          type: string
-          description: WebSocket 连接时返回的客户端 ID
-        sendUserId:
-          type: string
-          description: 发送者 ID
-        code:
-          type: integer
-          description: 自定义状态码
-          example: 1001
-        msg:
-          type: string
-          description: 自定义状态消息
-          example: hello
-        data:
-          type: string
-          description: 消息内容（JSON 字符串）
-          example: '{"text":"hi"}'
-    SendToClientsRequest:
-      type: object
-      required:
-      - clientIds
-      - code
-      - msg
-      - data
-      properties:
-        clientIds:
-          type: array
-          items:
-            type: string
-        sendUserId:
-          type: string
-        code:
-          type: integer
-          example: 1001
-        msg:
-          type: string
-        data:
-          type: string
-    ChatDeliverRequest:
-      type: object
-      required:
-      - user_ids
-      - data
-      properties:
-        app_id:
-          type: string
-          description: 租户 appId；也可使用 Header AppId
-        user_ids:
-          type: array
-          items:
-            type: string
-          description: 目标用户 ID 列表，投递到每个用户的所有在线设备
-        sendUserId:
-          type: string
-          description: 发送者用户 ID
-        code:
-          type: integer
-          example: 20001
-        msg:
-          type: string
-          example: chat.message
-        data:
-          type: string
-          description: 消息 JSON 字符串
-        local_only:
-          type: boolean
-          description: 内部节点转发字段；业务方不传
-    BindToGroupRequest:
-      type: object
-      required:
-      - clientId
-      - groupName
-      properties:
-        clientId:
-          type: string
-        groupName:
-          type: string
-          description: 分组名（聊天室）
-        userId:
-          type: string
-          description: 业务用户 ID
-        extend:
-          type: string
-          description: 扩展字段
-    SendToGroupRequest:
-      type: object
-      required:
-      - groupName
-      - code
-      - msg
-      - data
-      properties:
-        sendUserId:
-          type: string
-        groupName:
-          type: string
-        code:
-          type: integer
-          example: 1001
-        msg:
-          type: string
-        data:
-          type: string
-    GetOnlineListRequest:
-      type: object
-      required:
-      - groupName
-      properties:
-        groupName:
-          type: string
-    CloseClientRequest:
-      type: object
-      required:
-      - clientId
-      properties:
-        clientId:
-          type: string
-    MessageIdData:
-      type: object
-      properties:
-        messageId:
-          type: string
-          example: 5b4646dd8328f4b1
-    OnlineListData:
-      type: object
-      properties:
-        count:
-          type: integer
-          example: 2
-        list:
-          type: array
-          items:
-            type: string
+  - url: https://im.ptelive.com
+  - url: http://127.0.0.1:11511
 paths:
-  /api/register:
-    post:
-      tags:
-      - account
-      summary: 注册业务系统
-      description: 注册 systemId，WebSocket 连接与后续 API 调用均依赖此 ID。
-      operationId: register
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RegisterRequest'
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-              example:
-                code: 0
-                msg: success
-                data: []
-  /api/send_to_client:
-    post:
-      tags:
-      - message
-      summary: 发送消息给指定客户端
-      operationId: sendToClient
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SendToClientRequest'
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-              example:
-                code: 0
-                msg: success
-                data:
-                  messageId: 5b4646dd8328f4b1
-  /api/send_to_clients:
-    post:
-      tags:
-      - message
-      summary: 批量发送给多个客户端
-      operationId: sendToClients
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SendToClientsRequest'
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-  /api/chat/deliver:
-    post:
-      tags:
-      - message
-      summary: 按用户投递聊天事件
-      description: api-chat outbox/MQ 消费后调用；im 只负责投递到用户在线设备，不承载消息真相。集群模式下入口节点会自动转发到其他 im 节点。
-      operationId: chatDeliver
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChatDeliverRequest'
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-  /api/bind_to_group:
-    post:
-      tags:
-      - group
-      summary: 绑定客户端到分组
-      operationId: bindToGroup
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BindToGroupRequest'
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-  /api/send_to_group:
-    post:
-      tags:
-      - group
-      summary: 发送消息给分组
-      operationId: sendToGroup
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SendToGroupRequest'
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-              example:
-                code: 0
-                msg: success
-                data:
-                  messageId: 5b4646dd8328f4b1
-  /api/get_online_list:
-    post:
-      tags:
-      - group
-      summary: 获取分组在线客户端列表
-      operationId: getOnlineList
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GetOnlineListRequest'
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-              example:
-                code: 0
-                msg: success
-                data:
-                  count: 2
-                  list:
-                  - WQReWw6m+wct+eKk/2rDiWcU4maU8JRTRZEX8c7Te6LzCa//VCXr/0KeVyO0sdNt
-  /api/close_client:
-    post:
-      tags:
-      - client
-      summary: 关闭指定连接
-      operationId: closeClient
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CloseClientRequest'
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-              example:
-                code: 0
-                msg: success
-                data: {}
-  /api/admin/connection/list:
-    post:
-      tags:
-      - admin
-      summary: IM 后台在线连接列表（集群聚合）
-      description: api-chat-admin 内部调用；集群模式下入口节点会聚合各节点 local-list。
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                app_id:
-                  type: string
-                user_id:
-                  type: string
-                client_id:
-                  type: string
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-  /api/admin/connection/local-list:
-    post:
-      tags:
-      - admin
-      summary: IM 后台本节点在线连接列表
-      description: 节点间聚合使用，只返回当前节点本地连接。
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                app_id:
-                  type: string
-                user_id:
-                  type: string
-                client_id:
-                  type: string
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-  /api/admin/connection/kick:
-    post:
-      tags:
-      - admin
-      summary: IM 后台踢连接或踢用户全部连接
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                app_id:
-                  type: string
-                client_id:
-                  type: string
-                user_id:
-                  type: string
-                reason:
-                  type: string
-      responses:
-        '200':
-          description: 成功
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
   /ping:
     get:
-      tags:
-      - health
-      summary: 存活探针
+      summary: IM 服务健康检查
       responses:
-        '200':
-          description: pong
+        '200': { description: pong }
+  /ws:
+    get:
+      summary: 客户端 WebSocket 连接
+      description: 使用 sdk_app_id、identifier、user_sig 建立连接；此端点不是 REST 请求。
+      responses:
+        '101': { description: Switching Protocols }
+  /api/register:
+    post:
+      summary: 注册 IM 应用或连接端信息
+      responses:
+        '200': { description: OK }
+  /api/send_to_client:
+    post:
+      summary: 向单个客户端投递消息
+      security: [{ AccessToken: [] }]
+      responses:
+        '200': { description: OK }
+  /api/send_to_clients:
+    post:
+      summary: 批量向客户端投递消息
+      security: [{ AccessToken: [] }]
+      responses:
+        '200': { description: OK }
+  /api/send_to_group:
+    post:
+      summary: 向群组投递消息
+      security: [{ AccessToken: [] }]
+      responses:
+        '200': { description: OK }
+  /api/bind_to_group:
+    post:
+      summary: 将连接绑定到群组
+      security: [{ AccessToken: [] }]
+      responses:
+        '200': { description: OK }
+  /api/get_online_list:
+    post:
+      summary: 查询群组在线连接
+      security: [{ AccessToken: [] }]
+      responses:
+        '200': { description: 在线列表 }
+  /api/close_client:
+    post:
+      summary: 关闭指定客户端连接
+      security: [{ AccessToken: [] }]
+      responses:
+        '200': { description: OK }
+  /api/chat/deliver:
+    post:
+      summary: 接收 api-chat 的可靠投递事件
+      security: [{ AccessToken: [] }]
+      responses:
+        '200': { description: 投递结果 }
+  /api/admin/connection/list:
+    post:
+      summary: 查询全局在线连接
+      security: [{ AccessToken: [] }]
+      responses:
+        '200': { description: 连接列表 }
+  /api/admin/connection/local-list:
+    post:
+      summary: 查询当前节点在线连接
+      security: [{ AccessToken: [] }]
+      responses:
+        '200': { description: 当前节点连接列表 }
+  /api/admin/connection/kick:
+    post:
+      summary: 管理端踢出在线连接
+      security: [{ AccessToken: [] }]
+      responses:
+        '200': { description: OK }
   /api/live/send_message:
     post:
-      tags:
-      - live
-      summary: 发送消息（弹幕审核/禁言校验，11003 走队列）
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                roomId:
-                  type: string
+      summary: 直播场景实时消息投递
+      security: [{ AccessToken: [] }]
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
+        '200': { description: OK }
   /api/live/linkmic_list:
     post:
-      tags:
-      - live
-      summary: 连麦申请列表
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                roomId:
-                  type: string
+      summary: 查询直播连麦列表
+      security: [{ AccessToken: [] }]
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
+        '200': { description: 连麦列表 }
   /api/live/mute_list:
     post:
-      tags:
-      - live
-      summary: 禁言用户列表
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                roomId:
-                  type: string
+      summary: 查询直播禁言列表
+      security: [{ AccessToken: [] }]
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
+        '200': { description: 禁言列表 }
   /api/live/gift_list:
     post:
-      tags:
-      - live
-      summary: 礼物列表（分页）
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                roomId:
-                  type: string
+      summary: 查询直播礼物列表
+      security: [{ AccessToken: [] }]
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
+        '200': { description: 礼物列表 }
   /api/live/gift_count:
     post:
-      tags:
-      - live
-      summary: 礼物数量/金额
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                roomId:
-                  type: string
+      summary: 查询直播礼物统计
+      security: [{ AccessToken: [] }]
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
+        '200': { description: 礼物统计 }
   /api/live/room_info:
     post:
-      tags:
-      - live
-      summary: 房间本场在线/累计人数与配置（按 current_session_id）
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                roomId:
-                  type: string
+      summary: 查询直播房间实时信息
+      security: [{ AccessToken: [] }]
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
+        '200': { description: 房间信息 }
   /api/live/session_counts_reset:
     post:
-      tags:
-      - live
-      summary: 新场次开播重置本场人数（清空并按当前 WS 重建，广播 11022/11023）
-      parameters:
-      - $ref: '#/components/parameters/AppIdHeader'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-              - roomId
-              properties:
-                roomId:
-                  type: string
-                sessionId:
-                  type: string
-                  description: 可选；空则读 live:room current_session_id
+      summary: 重置直播会话计数
+      security: [{ AccessToken: [] }]
       responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
+        '200': { description: OK }
+  /api/live/disconnect_user:
+    post:
+      summary: 断开直播用户连接
+      security: [{ AccessToken: [] }]
+      responses:
+        '200': { description: OK }
+components:
+  securitySchemes:
+    AccessToken:
+      type: apiKey
+      in: header
+      name: AccessToken
