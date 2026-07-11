@@ -268,7 +268,7 @@ CREATE TABLE IF NOT EXISTS `chat_outbox` (
   KEY `idx_chat_outbox_status` (`app_id`, `status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='IM outbox事件';
 
--- IM scene-domain：娱乐直播 / 语聊房的房间、成员、麦位、PK 与事件流
+-- IM scene-domain：社交直播 / 语聊房的房间、成员、麦位、PK 与事件流
 CREATE TABLE IF NOT EXISTS `scene_room` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `app_id` int NOT NULL DEFAULT 0,

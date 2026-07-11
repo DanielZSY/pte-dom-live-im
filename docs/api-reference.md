@@ -5,7 +5,7 @@
 | 服务 | 对外用途 | OpenAPI |
 | --- | --- | --- |
 | api-im | WebSocket 连接、服务端实时投递、连接管理 | [`pte-live-im/docs/openapi.yaml`](../pte-live-im/docs/openapi.yaml) |
-| api-chat | UserSig、会话、消息、弹幕、娱乐直播与语聊房 | [`pte-live-api-chat/docs/openapi.yaml`](../pte-live-api-chat/docs/openapi.yaml) |
+| api-chat | UserSig、会话、消息、弹幕、社交直播与语聊房 | [`pte-live-api-chat/docs/openapi.yaml`](../pte-live-api-chat/docs/openapi.yaml) |
 | api-chat-admin | IM 后台登录、RBAC、运营治理和运维查询 | [`pte-live-api-chat-admin/docs/openapi.yaml`](../pte-live-api-chat-admin/docs/openapi.yaml) |
 
 可把任意 `openapi.yaml` 导入 Swagger UI、Postman 或 Apifox。默认开发地址分别是 `http://127.0.0.1:11511`、`http://127.0.0.1:11504` 和 `http://127.0.0.1:11505`；生产环境改用对应 `ptelive.com` 域名。

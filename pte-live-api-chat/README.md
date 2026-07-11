@@ -1,6 +1,6 @@
 # pte-live-api-chat
 
-IM 聊天与场景消息业务 API。负责 UserSig、单聊/群聊会话、消息、弹幕、娱乐直播/语聊房场景、敏感词和 outbox 可靠投递；实时长连接与在线连接由 `pte-live-im` 负责。
+IM 聊天与场景消息业务 API。负责 UserSig、单聊/群聊会话、消息、弹幕、社交直播/语聊房场景、敏感词和 outbox 可靠投递；实时长连接与在线连接由 `pte-live-im` 负责。
 
 ```bash
 make run

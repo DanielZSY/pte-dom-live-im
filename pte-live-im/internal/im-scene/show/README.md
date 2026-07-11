@@ -1,6 +1,6 @@
 # im-scene/show
 
-娱乐直播 IM 场景目录。业务状态由 `pte-live-api-chat` 的 scene-domain 持久化，im-core 只做订阅和广播。
+社交直播 IM 场景目录。业务状态由 `pte-live-api-chat` 的 scene-domain 持久化，im-core 只做订阅和广播。
 
 ## 目标能力
 

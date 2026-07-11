@@ -38,7 +38,7 @@ const auditStatusMap: Record<number, { label: string; type: TagType }> = {
 
 const sceneMap: Record<string, { label: string; type: TagType }> = {
   shop: { label: '电商直播', type: 'primary' },
-  show: { label: '娱乐直播', type: 'success' },
+  show: { label: '社交直播', type: 'success' },
   voice: { label: '语音房', type: 'warning' },
 };
 
@@ -52,7 +52,7 @@ const formOptions: VbenFormProps = {
       componentProps: {
         options: [
           { label: '电商直播', value: 'shop' },
-          { label: '娱乐直播', value: 'show' },
+          { label: '社交直播', value: 'show' },
           { label: '语音房', value: 'voice' },
         ],
         placeholder: '请选择场景',

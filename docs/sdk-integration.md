@@ -15,14 +15,14 @@
 - 业务 API 以 JSON `POST` 为主，响应采用项目统一 JSON 结构。
 - 用户身份由业务侧签发和校验，不能让客户端持有 IM 应用 secret。
 - `client_msg_id` 用于发送消息的幂等；重试时必须保持不变。
-- 群聊、语聊房和娱乐直播场景接口在 `api-chat` 管理，WebSocket 只负责实时收发。
+- 群聊、语聊房和社交直播场景接口在 `api-chat` 管理，WebSocket 只负责实时收发。
 
 ## 场景路径
 
 | 场景 | API 前缀 |
 | --- | --- |
 | 电商直播弹幕 | `/api/v1/scene/shop` |
-| 娱乐直播房间 | `/api/v1/scene/show` |
+| 社交直播房间 | `/api/v1/scene/show` |
 | 语聊房 | `/api/v1/scene/voice` |
 | 通用场景房间 | `/api/v1/scene` |
 
